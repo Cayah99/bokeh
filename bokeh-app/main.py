@@ -12,7 +12,7 @@ from bokeh.plotting import figure, show, output_file
 import geopandas as gp
 import shapely
 import seaborn as sns
-from bokeh.io import curdoc, output_notebook
+from bokeh.io import curdoc
 from bokeh.layouts import layout, column, widgetbox, gridplot
 from bokeh.models import (Button, CategoricalColorMapper, ColumnDataSource, Select, RadioButtonGroup,
                           HoverTool, Label, SingleIntervalTicker, Slider,LinearColorMapper, MultiSelect, CheckboxButtonGroup, CheckboxGroup, RangeSlider)
@@ -22,7 +22,6 @@ from bokeh.models.widgets import Panel, Tabs
 import yaml
 from bokeh.server.server import Server
 from bokeh.driving import linear
-output_notebook()
 
 pd.set_option('chained_assignment', None)
 pd.options.display.float_format = '{:.4f}'.format
