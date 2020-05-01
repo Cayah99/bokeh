@@ -193,16 +193,16 @@ def update(step):
     ds1.trigger('data', ds1.data, ds1.data)
     ds2.trigger('data', ds2.data, ds2.data)
     if step == 2017:
-        doc.remove_periodic_callback(update)
+        curdoc().remove_periodic_callback(update)
 
 def animate():
     global callback_id
     if button.label == '► Play':
         button.label = '❚❚ Pause'
-        callback_id = doc.add_periodic_callback(update, 600)
+        callback_id = curdoc().add_periodic_callback(update, 600)
     else:
         button.label = '► Play'
-        doc.remove_periodic_callback(callback_id)
+        curdoc().remove_periodic_callback(callback_id)
 
 #Creating button for play and pause
 button = Button(label='► Play', width=800)
