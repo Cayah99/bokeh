@@ -298,3 +298,4 @@ tabs = Tabs(tabs=[tab1, tab2])
 
 #Making the document
 curdoc().add_root(tabs)
+curdoc().title = 'Terrorism'
