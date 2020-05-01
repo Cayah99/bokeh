@@ -35,26 +35,18 @@ from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
 import fiona
 
-
 # ## Importeren files
 
-# In[94]:
-
-
 #File with the terrorist attacks
-Terrorist_attacks = pd.read_excel('C:/Users/kyrajongman/Documents/Challenge/Terrorist attacks.xlsx')
+Terrorist_attacks = pd.read_excel('Data/Terrorist attacks.xlsx')
 
 #File with the geometry values of the world
 world = gp.read_file(gp.datasets.get_path('naturalearth_lowres'))
 
 #File with human development index wordt geopend
-Human_Development_Index = pd.read_excel('C:/Users/kyrajongman/Documents/Challenge/HDI.xlsx')
-
+Human_Development_Index = pd.read_excel('Data/HDI.xlsx')
 
 # ## Cleanen data 
-
-# In[98]:
-
 
 #Using dissolve to group by the dataframe with geometry values
 World = gp.GeoDataFrame(world.dissolve(by='name').reset_index())
@@ -63,24 +55,12 @@ World = gp.GeoDataFrame(world.dissolve(by='name').reset_index())
 #Using reset_index to rest the index columns to normal columns
 Terrorist_attacks_df = pd.DataFrame(Terrorist_attacks.groupby(['Country', 'Year']).sum().reset_index())
 
-
-# In[99]:
-
-
 #Making cumulative values
 Terrorist_attacks_df['no_cumulative'] = Terrorist_attacks_df.groupby(['Country'])['nkill'].apply(lambda x: x.cumsum())
-
-
-# In[100]:
-
 
 #Changing the value names so that the columns can be merged
 World.loc[World['name'] == 'United States of America', World.columns[0]] = 'United States'
 World.loc[World['name'] == 'Congo', World.columns[0]] = 'Republic of the Congo'
-
-
-# In[101]:
-
 
 #Convert the multipolygon values to polygon values
 indf = World
@@ -96,17 +76,9 @@ for idx, row in indf.iterrows():
             multdf.loc[geom,'geometry'] = row.geometry[geom]
             outdf = outdf.append(multdf,ignore_index=True)
 
-
-# In[102]:
-
-
 #Making a dataframe with the polygon values
 GeoDataframe_outdf = gp.GeoDataFrame(outdf)
 Countries_Polygon = gp.GeoDataFrame(GeoDataframe_outdf[GeoDataframe_outdf.geometry.type == 'Polygon'])
-
-
-# In[103]:
-
 
 #Combining the two dataframes on the country names
 Two_Dataframes = pd.merge(left=Terrorist_attacks_df, right=Countries_Polygon, left_on='Country', right_on='name')
@@ -114,11 +86,7 @@ Two_Dataframes = pd.merge(left=Terrorist_attacks_df, right=Countries_Polygon, le
 #Making a new dataframe with the year, country, amount of kills and geometry columns
 Amount_of_Terrorist_Attacks = gp.GeoDataFrame(Two_Dataframes, columns = ['Year', 'Country', 'no_cumulative', 'geometry'])
 
-
 # ## Making a map 
-
-# In[119]:
-
 
 def bkapp(doc):
     
@@ -337,21 +305,4 @@ def bkapp(doc):
     #Making the document
     doc.add_root(tabs)
 
-
-# In[120]:
-
-
 show(bkapp)
-
-
-# In[132]:
-
-
-bokeh serve --show bkapp
-
-
-# In[ ]:
-
-
-
-
