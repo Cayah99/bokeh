@@ -295,5 +295,5 @@ tab2 = Panel(child=grid1,title="Development of terrorism attacks in the world")
 tabs = Tabs(tabs=[tab1, tab2])
 
 #Making the document
-doc.add_root(tabs)
-doc.title = "Terrorism"
+curdoc().add_root(tabs)
+curdoc().title = "Terrorism"
