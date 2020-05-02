@@ -192,7 +192,7 @@ def update(step):
     ds1.trigger('data', ds1.data, ds1.data)
     ds2.trigger('data', ds2.data, ds2.data)
     if step == 2017:
-        curdoc().remove_periodic_callback(update)
+        curdoc().remove_periodic_callback(callback_id)
 
 def animate():
     global callback_id
