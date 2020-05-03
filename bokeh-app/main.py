@@ -284,7 +284,7 @@ grid = gridplot([[p],[slider, button]])
 #grid1 = gridplot([[None, button], [p], [select, None, slider_range], [k, t]])
 tab1 = Panel(child=grid, title='General',)
 #tab2 = Panel(child=grid1,title="Development of terrorism attacks in the world")
-tabs = Tabs(tabs=[tab1]#, tab2])
+tabs = Tabs(tabs=[tab1])#, tab2])
 
 #Making the curdoc()ument
 curdoc().add_root(tabs)
