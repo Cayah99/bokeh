@@ -3,7 +3,6 @@ dependencies:
   - shapely
   - seaborn
   - yaml
-  - warnings
   - fiona
   - pandas
   - xlrd
