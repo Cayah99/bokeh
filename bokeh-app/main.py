@@ -18,7 +18,7 @@ from bokeh.models.widgets import Panel, Tabs
 import yaml
 from bokeh.server.server import Server
 from bokeh.driving import linear
-output_notebook()
+#output_notebook()
 
 pd.set_option('chained_assignment', None)
 pd.options.display.float_format = '{:.4f}'.format
