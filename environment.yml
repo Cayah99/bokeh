@@ -241,8 +241,6 @@ dependencies:
     - pyotp
     - pyrect
     - pyscreeze
-    - python-anticaptcha
-    - python-graphviz
     - pytweening
     - queuelib
     - regex
