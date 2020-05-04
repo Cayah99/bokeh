@@ -52,7 +52,6 @@ dependencies:
   - hdf4
   - hdf5
   - html5lib
-  - icc_rt
   - icu
   - idna
   - importlib_metadata
@@ -68,7 +67,6 @@ dependencies:
   - json5
   - jsonschema
   - jupyter_client
-  - jupyter_cor
   - jupyterlab
   - jupyterlab_server
   - kealib
@@ -94,14 +92,8 @@ dependencies:
   - lxml
   - lz4-c
   - lzo
-  - m2w64-gcc-libgfortran
-  - m2w64-gcc-libs
-  - m2w64-gcc-libs-core
-  - m2w64-gmp
-  - m2w64-libwinpthread-git
   - markupsafe
   - matplotlib-base
-  - menuinst
   - mercantile
   - mistune
   - mkl
@@ -151,8 +143,6 @@ dependencies:
   - python-dateutil
   - python-libarchive-c
   - pytz
-  - pywin32
-  - pywinpty
   - pyyaml
   - pyzmq
   - qt
@@ -186,8 +176,6 @@ dependencies:
   - wheel
   - widgetsnbextension
   - win_inet_pton
-  - wincertstore
-  - winpty
   - xerces-c
   - xmltodict
   - xz
