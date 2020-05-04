@@ -1,12 +1,12 @@
 
 import pandas as pd
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
-# from shapely.geometry.polygon import Polygon
-# from shapely.geometry.multipolygon import MultiPolygon
+from shapely.geometry.polygon import Polygon
+from shapely.geometry.multipolygon import MultiPolygon
 from bokeh.plotting import figure, show, output_file
-# import geopandas as gp
-# import shapely
+import geopandas as gp
+import shapely
 import seaborn as sns
 from bokeh.io import curdoc, output_notebook
 from bokeh.layouts import layout, column, widgetbox, gridplot
@@ -26,19 +26,19 @@ pd.options.display.float_format = '{:.4f}'.format
 
 from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
-import fiona
+#import fiona
 
 #File with the terrorist attacks
 Terrorist_attacks = pd.read_excel('Data/Terrorist attacks.xlsx')
 
 #File with the geometry values of the world
-# world = gp.read_file(gp.datasets.get_path('naturalearth_lowres'))
+world = gp.read_file(gp.datasets.get_path('naturalearth_lowres'))
 
 #File with human development index wordt geopend
 Human_Development_Index = pd.read_excel('Data/HDI.xlsx')
 
 #Using dissolve to group by the dataframe with geometry values
-# World = gp.GeoDataFrame(world.dissolve(by='name').reset_index())
+World = gp.GeoDataFrame(world.dissolve(by='name').reset_index())
 
 #Using group by to group the dataframe on country and year
 #Using reset_index to rest the index columns to normal columns
@@ -47,123 +47,123 @@ Terrorist_attacks_df = pd.DataFrame(Terrorist_attacks.groupby(['Country', 'Year'
 #Making cumulative values
 Terrorist_attacks_df['no_cumulative'] = Terrorist_attacks_df.groupby(['Country'])['nkill'].apply(lambda x: x.cumsum())
 
-# #Changing the value names so that the columns can be merged
-# World.loc[World['name'] == 'United States of America', World.columns[0]] = 'United States'
-# World.loc[World['name'] == 'Congo', World.columns[0]] = 'Republic of the Congo'
+#Changing the value names so that the columns can be merged
+World.loc[World['name'] == 'United States of America', World.columns[0]] = 'United States'
+World.loc[World['name'] == 'Congo', World.columns[0]] = 'Republic of the Congo'
 
-# #Convert the multipolygon values to polygon values
-# indf = World
-# outdf = gp.GeoDataFrame(columns=indf.columns)
-# for idx, row in indf.iterrows():
-#     if type(row.geometry) == Polygon:
-#         outdf = outdf.append(row,ignore_index=True)
-#     if type(row.geometry) == MultiPolygon:
-#         multdf = gp.GeoDataFrame(columns=indf.columns)
-#         recs = len(row.geometry)
-#         multdf = multdf.append([row]*recs,ignore_index=True)
-#         for geom in range(recs):
-#             multdf.loc[geom,'geometry'] = row.geometry[geom]
-#             outdf = outdf.append(multdf,ignore_index=True)
+#Convert the multipolygon values to polygon values
+indf = World
+outdf = gp.GeoDataFrame(columns=indf.columns)
+for idx, row in indf.iterrows():
+    if type(row.geometry) == Polygon:
+        outdf = outdf.append(row,ignore_index=True)
+    if type(row.geometry) == MultiPolygon:
+        multdf = gp.GeoDataFrame(columns=indf.columns)
+        recs = len(row.geometry)
+        multdf = multdf.append([row]*recs,ignore_index=True)
+        for geom in range(recs):
+            multdf.loc[geom,'geometry'] = row.geometry[geom]
+            outdf = outdf.append(multdf,ignore_index=True)
 
-# #Making a dataframe with the polygon values
-# GeoDataframe_outdf = gp.GeoDataFrame(outdf)
-# Countries_Polygon = gp.GeoDataFrame(GeoDataframe_outdf[GeoDataframe_outdf.geometry.type == 'Polygon'])
+#Making a dataframe with the polygon values
+GeoDataframe_outdf = gp.GeoDataFrame(outdf)
+Countries_Polygon = gp.GeoDataFrame(GeoDataframe_outdf[GeoDataframe_outdf.geometry.type == 'Polygon'])
 
-# #Combining the two dataframes on the country names
-# Two_Dataframes = pd.merge(left=Terrorist_attacks_df, right=Countries_Polygon, left_on='Country', right_on='name')
+#Combining the two dataframes on the country names
+Two_Dataframes = pd.merge(left=Terrorist_attacks_df, right=Countries_Polygon, left_on='Country', right_on='name')
 
-# #Making a new dataframe with the year, country, amount of kills and geometry columns
-# Amount_of_Terrorist_Attacks = gp.GeoDataFrame(Two_Dataframes, columns = ['Year', 'Country', 'no_cumulative', 'geometry'])
+#Making a new dataframe with the year, country, amount of kills and geometry columns
+Amount_of_Terrorist_Attacks = gp.GeoDataFrame(Two_Dataframes, columns = ['Year', 'Country', 'no_cumulative', 'geometry'])
 
-# #Creating x and y instead of geometry
-# def getPolyCoords(row, geom, coord_type):
-#         if coord_type == 'x':
-#             return list(row[geom].exterior.coords.xy[0])
-#         elif coord_type == 'y':
-#             return list(row[geom].exterior.coords.xy[1])
+#Creating x and y instead of geometry
+def getPolyCoords(row, geom, coord_type):
+        if coord_type == 'x':
+            return list(row[geom].exterior.coords.xy[0])
+        elif coord_type == 'y':
+            return list(row[geom].exterior.coords.xy[1])
 
-# gdf = Amount_of_Terrorist_Attacks
-# gdf['x'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'x', axis = 1)
-# gdf['y'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'y', axis = 1)
+gdf = Amount_of_Terrorist_Attacks
+gdf['x'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'x', axis = 1)
+gdf['y'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'y', axis = 1)
 
-# #Delete the geometry column
-# p_df = gdf.drop('geometry', axis = 1).copy()
-# gefilterde_df_1970 = p_df[p_df['Year'] == 1970] 
+#Delete the geometry column
+p_df = gdf.drop('geometry', axis = 1).copy()
+gefilterde_df_1970 = p_df[p_df['Year'] == 1970] 
 
-# #Creating Column Data Source
-# source = ColumnDataSource({
-#     'x': gefilterde_df_1970['x'], 
-#     'y': gefilterde_df_1970['y'], 
-#     'Country': gefilterde_df_1970['Country'], 
-#     'no_cumulative': gefilterde_df_1970['no_cumulative']
-# })
+#Creating Column Data Source
+source = ColumnDataSource({
+    'x': gefilterde_df_1970['x'], 
+    'y': gefilterde_df_1970['y'], 
+    'Country': gefilterde_df_1970['Country'], 
+    'no_cumulative': gefilterde_df_1970['no_cumulative']
+})
 
-# #Creating color palette for plot
-# color_mapper = LinearColorMapper(palette= Viridis256,
-#                                  low = min(p_df['no_cumulative']),
-#                                  high = max(p_df['no_cumulative']))
+#Creating color palette for plot
+color_mapper = LinearColorMapper(palette= Viridis256,
+                                 low = min(p_df['no_cumulative']),
+                                 high = max(p_df['no_cumulative']))
 
-# # Creating the figure
-# p = figure(title = "Amount of kills over the years", height=700, width=950)
-# p.xaxis.axis_label = "Longitude"
-# p.yaxis.axis_label = "Latitude"
-# p.patches(xs = 'x', ys = 'y', source = source, line_color = "white", line_width = 0.5, fill_color ={'field':'no_cumulative','transform':color_mapper})
+# Creating the figure
+p = figure(title = "Amount of kills over the years", height=700, width=950)
+p.xaxis.axis_label = "Longitude"
+p.yaxis.axis_label = "Latitude"
+p.patches(xs = 'x', ys = 'y', source = source, line_color = "white", line_width = 0.5, fill_color ={'field':'no_cumulative','transform':color_mapper})
 
-# #Add text
-# label = Label(x=-170, y=-50, text=str(min(Amount_of_Terrorist_Attacks['Year'])), text_font_size='70pt', text_color='#A9A9A9')
-# p.add_layout(label)
+#Add text
+label = Label(x=-170, y=-50, text=str(min(Amount_of_Terrorist_Attacks['Year'])), text_font_size='70pt', text_color='#A9A9A9')
+p.add_layout(label)
 
-# #Add colorbar
-# bar = ColorBar(color_mapper=color_mapper,location=(0,0))
-# p.add_layout(bar, 'right')
+#Add colorbar
+bar = ColorBar(color_mapper=color_mapper,location=(0,0))
+p.add_layout(bar, 'right')
 
-# def update_plot(attr, old, new):
-#     #Update glyph locations
-#     yr = slider.value
-#     Amount_nkills_df = p_df[p_df['Year']== yr]
-#     new_data = {
-#         'x': Amount_nkills_df['x'], 
-#         'y': Amount_nkills_df['y'], 
-#         'Country': Amount_nkills_df['Country'], 
-#         'no_cumulative': Amount_nkills_df['no_cumulative']
-#         }
-#     source.data = new_data
-#     label.text = str(yr)
+def update_plot(attr, old, new):
+    #Update glyph locations
+    yr = slider.value
+    Amount_nkills_df = p_df[p_df['Year']== yr]
+    new_data = {
+        'x': Amount_nkills_df['x'], 
+        'y': Amount_nkills_df['y'], 
+        'Country': Amount_nkills_df['Country'], 
+        'no_cumulative': Amount_nkills_df['no_cumulative']
+        }
+    source.data = new_data
+    label.text = str(yr)
 
-#     #Update colors
-#     color_mapper = LinearColorMapper(palette= Viridis256,
-#                                  low = min(new_data['no_cumulative']),
-#                                  high = max(new_data['no_cumulative']))
+    #Update colors
+    color_mapper = LinearColorMapper(palette= Viridis256,
+                                 low = min(new_data['no_cumulative']),
+                                 high = max(new_data['no_cumulative']))
 
-# #Creating Slider for Year
-# start_yr = min(p_df['Year'])
-# end_yr = max(p_df['Year'])
-# slider = Slider(start=start_yr, end=end_yr, step=1, value=start_yr, title='Year', width=450)
-# slider.on_change('value',update_plot)
+#Creating Slider for Year
+start_yr = min(p_df['Year'])
+end_yr = max(p_df['Year'])
+slider = Slider(start=start_yr, end=end_yr, step=1, value=start_yr, title='Year', width=450)
+slider.on_change('value',update_plot)
 
-# #Creating animate update function for slider
-# def animate_update():
-#     year = slider.value + 1
-#     if year > end_yr:
-#         year = start_yr
-#     slider.value = year
+#Creating animate update function for slider
+def animate_update():
+    year = slider.value + 1
+    if year > end_yr:
+        year = start_yr
+    slider.value = year
 
-# #Creating animate function for slider with button
-# def animate():
-#     global callback_id
-#     if button.label == '► Play':
-#         button.label = '❚❚ Pause'
-#         callback_id = curdoc().add_periodic_callback(animate_update, 1000)
-#     else:
-#         button.label = '► Play'
-#         curdoc().remove_periodic_callback(callback_id)
+#Creating animate function for slider with button
+def animate():
+    global callback_id
+    if button.label == '► Play':
+        button.label = '❚❚ Pause'
+        callback_id = curdoc().add_periodic_callback(animate_update, 1000)
+    else:
+        button.label = '► Play'
+        curdoc().remove_periodic_callback(callback_id)
 
-# #Creating button for play and pause
-# button = Button(label='► Play', width=450)
-# button.on_click(animate)
+#Creating button for play and pause
+button = Button(label='► Play', width=450)
+button.on_click(animate)
 
-# #Creating layout
-# grid = gridplot([[p],[slider, button]])
+#Creating layout
+grid = gridplot([[p],[slider, button]])
 
 df_Terrorist = pd.DataFrame(Terrorist_attacks.groupby('Year').agg({'City':'size', 'nkill':'sum'}).reset_index())
 year = df_Terrorist['Year']
