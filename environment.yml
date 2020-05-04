@@ -3,7 +3,6 @@ dependencies:
   - shapely
   - seaborn
   - yaml
-  - fiona
   - pandas
   - xlrd
   - numpy
