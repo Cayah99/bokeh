@@ -1,4 +1,4 @@
-
+from os.path import join, dirname
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -29,13 +29,13 @@ from bokeh.application.handlers.function import FunctionHandler
 #import fiona
 
 #File with the terrorist attacks
-Terrorist_attacks = pd.read_excel('Data/Terrorist attacks.xlsx')
+Terrorist_attacks = pd.read_excel(join(dirname(__file__), 'Data/Terrorist attacks.xlsx'))
 
 #File with the geometry values of the world
 world = gp.read_file(gp.datasets.get_path('naturalearth_lowres'))
 
 #File with human development index wordt geopend
-Human_Development_Index = pd.read_excel('Data/HDI.xlsx')
+Human_Development_Index = pd.read_excel(join(dirname(__file__), 'Data/HDI.xlsx'))
 
 #Using dissolve to group by the dataframe with geometry values
 World = gp.GeoDataFrame(world.dissolve(by='name').reset_index())
