@@ -287,6 +287,6 @@ tab2 = Panel(child=grid1,title="Development of terrorism attacks in the world")
 tabs = Tabs(tabs=[tab2])#, tab1])
 
 #Making the curdoc()ument
-curdoc().add_root(tabs)
+curdoc().add_root(select)
 curdoc().title = 'Terrorism'
 
