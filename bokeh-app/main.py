@@ -4,6 +4,7 @@
 # ## Importeren packages 
 
 import pandas as pd
+from os.path import dirname, join
 import matplotlib.pyplot as plt
 import numpy as np
 from shapely.geometry.polygon import Polygon
@@ -31,9 +32,6 @@ warnings.filterwarnings('ignore')
 from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
 import fiona
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import PolynomialFeatures
 
 
 # ## Importeren files
