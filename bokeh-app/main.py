@@ -90,229 +90,225 @@ Two_Dataframes = pd.merge(left=Terrorist_attacks_df, right=Countries_Polygon, le
 Amount_of_Terrorist_Attacks = gp.GeoDataFrame(Two_Dataframes, columns = ['Year', 'Country', 'no_cumulative', 'geometry'])
 
 
-# ## Making a map 
+# ## Making a map   
+#Creating x and y instead of geometry
+def getPolyCoords(row, geom, coord_type):
+        if coord_type == 'x':
+            return list(row[geom].exterior.coords.xy[0])
+        elif coord_type == 'y':
+            return list(row[geom].exterior.coords.xy[1])
 
-def bkapp(doc):    
-    #Creating x and y instead of geometry
-    def getPolyCoords(row, geom, coord_type):
-            if coord_type == 'x':
-                return list(row[geom].exterior.coords.xy[0])
-            elif coord_type == 'y':
-                return list(row[geom].exterior.coords.xy[1])
+gdf = Amount_of_Terrorist_Attacks
+gdf['x'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'x', axis = 1)
+gdf['y'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'y', axis = 1)
 
-    gdf = Amount_of_Terrorist_Attacks
-    gdf['x'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'x', axis = 1)
-    gdf['y'] = gdf.apply(getPolyCoords, geom = 'geometry', coord_type = 'y', axis = 1)
+#Delete the geometry column
+p_df = gdf.drop('geometry', axis = 1).copy()
+gefilterde_df_1970 = p_df[p_df['Year'] == 1970] 
 
-    #Delete the geometry column
-    p_df = gdf.drop('geometry', axis = 1).copy()
-    gefilterde_df_1970 = p_df[p_df['Year'] == 1970] 
+#Creating Column Data Source
+source = ColumnDataSource({
+    'x': gefilterde_df_1970['x'], 
+    'y': gefilterde_df_1970['y'], 
+    'Country': gefilterde_df_1970['Country'], 
+    'no_cumulative': gefilterde_df_1970['no_cumulative']
+})
 
-    #Creating Column Data Source
-    source = ColumnDataSource({
-        'x': gefilterde_df_1970['x'], 
-        'y': gefilterde_df_1970['y'], 
-        'Country': gefilterde_df_1970['Country'], 
-        'no_cumulative': gefilterde_df_1970['no_cumulative']
-    })
+#Creating color palette for plot
+color_mapper = LinearColorMapper(palette= Viridis256,
+                                 low = min(p_df['no_cumulative']),
+                                 high = max(p_df['no_cumulative']))
 
-    #Creating color palette for plot
+# Creating the figure
+p = figure(title = "Amount of kills over the years", height=700, width=950,y_range=(-100, 100),x_range=(-200, 200))
+p.xaxis.axis_label = "Longitude"
+p.yaxis.axis_label = "Latitude"
+p.patches(xs = 'x', ys = 'y', source = source, line_color = "white", line_width = 0.5, fill_color ={'field':'no_cumulative','transform':color_mapper})
+
+#Add text
+label = Label(x=-170, y=-50, text=str(min(Amount_of_Terrorist_Attacks['Year'])), text_font_size='70pt', text_color='#A9A9A9')
+p.add_layout(label)
+
+#Add colorbar
+bar = ColorBar(color_mapper=color_mapper,location=(0,0))
+p.add_layout(bar, 'right')
+
+def update_plot(attr, old, new):
+    #Update glyph locations
+    yr = slider.value
+    Amount_nkills_df = p_df[p_df['Year']== yr]
+    new_data = {
+        'x': Amount_nkills_df['x'], 
+        'y': Amount_nkills_df['y'], 
+        'Country': Amount_nkills_df['Country'], 
+        'no_cumulative': Amount_nkills_df['no_cumulative']
+        }
+    source.data = new_data
+    label.text = str(yr)
+
+    #Update colors
     color_mapper = LinearColorMapper(palette= Viridis256,
-                                     low = min(p_df['no_cumulative']),
-                                     high = max(p_df['no_cumulative']))
+                                 low = min(new_data['no_cumulative']),
+                                 high = max(new_data['no_cumulative']))
 
-    # Creating the figure
-    p = figure(title = "Amount of kills over the years", height=700, width=950,y_range=(-100, 100),x_range=(-200, 200))
-    p.xaxis.axis_label = "Longitude"
-    p.yaxis.axis_label = "Latitude"
-    p.patches(xs = 'x', ys = 'y', source = source, line_color = "white", line_width = 0.5, fill_color ={'field':'no_cumulative','transform':color_mapper})
+#Creating Slider for Year
+start_yr = min(p_df['Year'])
+end_yr = max(p_df['Year'])
+slider = Slider(start=start_yr, end=end_yr, step=1, value=start_yr, title='Year', width=450)
+slider.on_change('value',update_plot)
 
-    #Add text
-    label = Label(x=-170, y=-50, text=str(min(Amount_of_Terrorist_Attacks['Year'])), text_font_size='70pt', text_color='#A9A9A9')
-    p.add_layout(label)
+#Creating animate update function for slider
+def animate_update():
+    year = slider.value + 1
+    if year > end_yr:
+        year = start_yr
+    slider.value = year
 
-    #Add colorbar
-    bar = ColorBar(color_mapper=color_mapper,location=(0,0))
-    p.add_layout(bar, 'right')
+#Creating animate function for slider with button
+def animate():
+    global callback_id
+    if button.label == '► Play':
+        button.label = '❚❚ Pause'
+        callback_id = doc.add_periodic_callback(animate_update, 1000)
+    else:
+        button.label = '► Play'
+        doc.remove_periodic_callback(callback_id)
 
-    def update_plot(attr, old, new):
-        #Update glyph locations
-        yr = slider.value
-        Amount_nkills_df = p_df[p_df['Year']== yr]
-        new_data = {
-            'x': Amount_nkills_df['x'], 
-            'y': Amount_nkills_df['y'], 
-            'Country': Amount_nkills_df['Country'], 
-            'no_cumulative': Amount_nkills_df['no_cumulative']
-            }
-        source.data = new_data
-        label.text = str(yr)
+#Creating button for play and pause
+button = Button(label='► Play', width=450)
+button.on_click(animate)
 
-        #Update colors
-        color_mapper = LinearColorMapper(palette= Viridis256,
-                                     low = min(new_data['no_cumulative']),
-                                     high = max(new_data['no_cumulative']))
-
-    #Creating Slider for Year
-    start_yr = min(p_df['Year'])
-    end_yr = max(p_df['Year'])
-    slider = Slider(start=start_yr, end=end_yr, step=1, value=start_yr, title='Year', width=450)
-    slider.on_change('value',update_plot)
-
-    #Creating animate update function for slider
-    def animate_update():
-        year = slider.value + 1
-        if year > end_yr:
-            year = start_yr
-        slider.value = year
-
-    #Creating animate function for slider with button
-    def animate():
-        global callback_id
-        if button.label == '► Play':
-            button.label = '❚❚ Pause'
-            callback_id = doc.add_periodic_callback(animate_update, 1000)
-        else:
-            button.label = '► Play'
-            doc.remove_periodic_callback(callback_id)
-
-    #Creating button for play and pause
-    button = Button(label='► Play', width=450)
-    button.on_click(animate)
-
-    #Creating layout
-    layout1 = layout([
-    [p],
-    [slider, button],
+#Creating layout
+layout1 = layout([
+[p],
+[slider, button],
 ], sizing_mode='scale_width')
 
-    df_Terrorist = pd.DataFrame(Terrorist_attacks.groupby('Year').agg({'City':'size', 'nkill':'sum'}).reset_index())
-    year = df_Terrorist['Year']
-    city = df_Terrorist['City']
-    nkill = df_Terrorist['nkill']
+df_Terrorist = pd.DataFrame(Terrorist_attacks.groupby('Year').agg({'City':'size', 'nkill':'sum'}).reset_index())
+year = df_Terrorist['Year']
+city = df_Terrorist['City']
+nkill = df_Terrorist['nkill']
 
-    p = figure(title = 'Development amount of attacks and kills', height = 400, width=800)
-    p.xaxis.axis_label = "Year"
-    p.yaxis.axis_label = "Amount"
-    r1 = p.line([], [], color="lightgreen", line_width=3, legend="Attacks")
-    r2 = p.line([], [], color="purple", line_width=3, legend="Kills")
+p = figure(title = 'Development amount of attacks and kills', height = 400, width=800)
+p.xaxis.axis_label = "Year"
+p.yaxis.axis_label = "Amount"
+r1 = p.line([], [], color="lightgreen", line_width=3, legend="Attacks")
+r2 = p.line([], [], color="purple", line_width=3, legend="Kills")
 
-    ds1 = r1.data_source
-    ds2 = r2.data_source
+ds1 = r1.data_source
+ds2 = r2.data_source
 
-    @linear(m=1, b=min(year))
-    def update(step):
-        ds1.data['x'].append(step)
-        ds1.data['y'].append(city[step-1970])
-        ds2.data['x'].append(step)
-        ds2.data['y'].append(nkill[step-1970])  
-        ds1.trigger('data', ds1.data, ds1.data)
-        ds2.trigger('data', ds2.data, ds2.data)
-        if step == 2017:
-            doc.remove_periodic_callback(callback_id)
+@linear(m=1, b=min(year))
+def update(step):
+    ds1.data['x'].append(step)
+    ds1.data['y'].append(city[step-1970])
+    ds2.data['x'].append(step)
+    ds2.data['y'].append(nkill[step-1970])  
+    ds1.trigger('data', ds1.data, ds1.data)
+    ds2.trigger('data', ds2.data, ds2.data)
+    if step == 2017:
+        doc.remove_periodic_callback(callback_id)
 
-    def animate():
-        global callback_id
-        if button.label == '► Play':
-            button.label = '❚❚ Pause'
-            callback_id = doc.add_periodic_callback(update, 600)
-        else:
-            button.label = '► Play'
-            doc.remove_periodic_callback(callback_id)
+def animate():
+    global callback_id
+    if button.label == '► Play':
+        button.label = '❚❚ Pause'
+        callback_id = doc.add_periodic_callback(update, 600)
+    else:
+        button.label = '► Play'
+        doc.remove_periodic_callback(callback_id)
 
-    #Creating button for play and pause
-    button = Button(label='► Play', width=800)
-    button.on_click(animate) 
+#Creating button for play and pause
+button = Button(label='► Play', width=800)
+button.on_click(animate) 
 
-    Gefilterde_df_Afghanistan = Terrorist_attacks[Terrorist_attacks['Country']=='Afghanistan']
-    success_Afghanistan = pd.DataFrame(Gefilterde_df_Afghanistan.groupby(['Year', 'Success', 'Country'])['City'].count().reset_index())
-    success_Afghanistan_0 = success_Afghanistan[success_Afghanistan['Success'] == 0.0]
-    success_Afghanistan_1 = success_Afghanistan[success_Afghanistan['Success']== 1.0]
+Gefilterde_df_Afghanistan = Terrorist_attacks[Terrorist_attacks['Country']=='Afghanistan']
+success_Afghanistan = pd.DataFrame(Gefilterde_df_Afghanistan.groupby(['Year', 'Success', 'Country'])['City'].count().reset_index())
+success_Afghanistan_0 = success_Afghanistan[success_Afghanistan['Success'] == 0.0]
+success_Afghanistan_1 = success_Afghanistan[success_Afghanistan['Success']== 1.0]
 
-    successdf = Terrorist_attacks[Terrorist_attacks['Success'].isnull() == False]
-    success = pd.DataFrame(successdf.groupby(['Year','Success', 'Country'])['City'].count().reset_index())
+successdf = Terrorist_attacks[Terrorist_attacks['Success'].isnull() == False]
+success = pd.DataFrame(successdf.groupby(['Year','Success', 'Country'])['City'].count().reset_index())
 
-    Human_Development_Index['HDI Score'] = [int('{:<03}'.format(score)) for score in Human_Development_Index['HDI Score']]
-    HDI_Afghanistan = Human_Development_Index[Human_Development_Index['Country'] == 'Afghanistan']
+Human_Development_Index['HDI Score'] = [int('{:<03}'.format(score)) for score in Human_Development_Index['HDI Score']]
+HDI_Afghanistan = Human_Development_Index[Human_Development_Index['Country'] == 'Afghanistan']
 
-    source1 = ColumnDataSource({
-            'x': success_Afghanistan_0['Year'], 
-            'y': success_Afghanistan_0['City'], 
-            'Country': success_Afghanistan_0['Country'], 
-            'Success': success_Afghanistan_0['Success']
-        })
-    source2 = ColumnDataSource({
-            'x': success_Afghanistan_1['Year'], 
-            'y': success_Afghanistan_1['City'], 
-            'Country': success_Afghanistan_1['Country'], 
-            'Success': success_Afghanistan_1['Success']
-        })
-
-    source3 = ColumnDataSource({
-        'x': HDI_Afghanistan['Year'], 
-        'y': HDI_Afghanistan['HDI Score']
+source1 = ColumnDataSource({
+        'x': success_Afghanistan_0['Year'], 
+        'y': success_Afghanistan_0['City'], 
+        'Country': success_Afghanistan_0['Country'], 
+        'Success': success_Afghanistan_0['Success']
+    })
+source2 = ColumnDataSource({
+        'x': success_Afghanistan_1['Year'], 
+        'y': success_Afghanistan_1['City'], 
+        'Country': success_Afghanistan_1['Country'], 
+        'Success': success_Afghanistan_1['Success']
     })
 
-    k = figure(title = 'Development of the attacks with success and no success', height = 500, width=400)
-    k.line('x', 'y', source = source1, color="lightgreen", line_width=3, legend="No success (0.0)")
-    k.line('x', 'y', source = source2, color="purple", line_width=3, legend="Success (1.0)")
-    k.xaxis.axis_label = "Year"
-    k.yaxis.axis_label = "Amount of attacks"
+source3 = ColumnDataSource({
+    'x': HDI_Afghanistan['Year'], 
+    'y': HDI_Afghanistan['HDI Score']
+})
 
-    t = figure(title='Development of Human Development Index', height = 500, width=400)
-    t.line('x', 'y', source=source3, color='purple', line_width=3)
-    t.xaxis.axis_label = "Year"
-    t.yaxis.axis_label = "HDI Score, 350(low)-1000(high)"
+k = figure(title = 'Development of the attacks with success and no success', height = 500, width=400)
+k.line('x', 'y', source = source1, color="lightgreen", line_width=3, legend="No success (0.0)")
+k.line('x', 'y', source = source2, color="purple", line_width=3, legend="Success (1.0)")
+k.xaxis.axis_label = "Year"
+k.yaxis.axis_label = "Amount of attacks"
 
-    def update_line(attr, old, new):
-        country = select.value
-        year_1 = slider_range.value[0]
-        year_2 = slider_range.value[1]
-        Success_Attacks = success[(success['Country'] == country) & (success['Year'] >= year_1) & (success['Year'] <= year_2)]
-        HDI_Country = Human_Development_Index[(Human_Development_Index['Country'] == country) & (Human_Development_Index['Year'] >= year_1) & (Human_Development_Index['Year'] <= year_2)]
-        Success_Attacks_0 = Success_Attacks[Success_Attacks['Success'] == 0.0]
-        Success_Attacks_1 = Success_Attacks[Success_Attacks['Success'] == 1.0]
-        New_Data_1 = {
-            'x': Success_Attacks_0['Year'], 
-            'y': Success_Attacks_0['City'], 
-            'Country': Success_Attacks_0['Country'], 
-            'Success': Success_Attacks_0['Success']
-        }
-        New_Data_2 = {
-            'x': Success_Attacks_1['Year'],
-            'y': Success_Attacks_1['City'],
-            'Country': Success_Attacks_1['Country'],
-            'Success': Success_Attacks_1['Success']
-        } 
-        New_Data_3 = {
-            'x': HDI_Country['Year'], 
-            'y': HDI_Country['HDI Score']
-        }
-        source1.data = New_Data_1
-        source2.data = New_Data_2
-        source3.data = New_Data_3
+t = figure(title='Development of Human Development Index', height = 500, width=400)
+t.line('x', 'y', source=source3, color='purple', line_width=3)
+t.xaxis.axis_label = "Year"
+t.yaxis.axis_label = "HDI Score, 350(low)-1000(high)"
 
-    Countries = Terrorist_attacks['Country'].dropna()
-    Countries_list = sorted(Countries.unique())
-    select = Select(title='Choose Country:', value='Afghanistan', options=Countries_list, width=380)
-    select.on_change('value', update_line)
+def update_line(attr, old, new):
+    country = select.value
+    year_1 = slider_range.value[0]
+    year_2 = slider_range.value[1]
+    Success_Attacks = success[(success['Country'] == country) & (success['Year'] >= year_1) & (success['Year'] <= year_2)]
+    HDI_Country = Human_Development_Index[(Human_Development_Index['Country'] == country) & (Human_Development_Index['Year'] >= year_1) & (Human_Development_Index['Year'] <= year_2)]
+    Success_Attacks_0 = Success_Attacks[Success_Attacks['Success'] == 0.0]
+    Success_Attacks_1 = Success_Attacks[Success_Attacks['Success'] == 1.0]
+    New_Data_1 = {
+        'x': Success_Attacks_0['Year'], 
+        'y': Success_Attacks_0['City'], 
+        'Country': Success_Attacks_0['Country'], 
+        'Success': Success_Attacks_0['Success']
+    }
+    New_Data_2 = {
+        'x': Success_Attacks_1['Year'],
+        'y': Success_Attacks_1['City'],
+        'Country': Success_Attacks_1['Country'],
+        'Success': Success_Attacks_1['Success']
+    } 
+    New_Data_3 = {
+        'x': HDI_Country['Year'], 
+        'y': HDI_Country['HDI Score']
+    }
+    source1.data = New_Data_1
+    source2.data = New_Data_2
+    source3.data = New_Data_3
 
-    str_year = min(success['Year'])
-    end_year = max(success['Year'])
-    slider_range = RangeSlider(title="Choose years", start=str_year, end=end_year, value=(str_year, end_year), step=5, width=400)
-    slider_range.on_change('value', update_line)
+Countries = Terrorist_attacks['Country'].dropna()
+Countries_list = sorted(Countries.unique())
+select = Select(title='Choose Country:', value='Afghanistan', options=Countries_list, width=380)
+select.on_change('value', update_line)
 
-    layout2 = layout([
-    [button],
-    [p],[select, slider_range],[k, t], 
+str_year = min(success['Year'])
+end_year = max(success['Year'])
+slider_range = RangeSlider(title="Choose years", start=str_year, end=end_year, value=(str_year, end_year), step=5, width=400)
+slider_range.on_change('value', update_line)
+
+layout2 = layout([
+[button],
+[p],[select, slider_range],[k, t], 
 ], sizing_mode='scale_width')
 
-    tab1 = Panel(child=layout1, title='General')
-    tab2 = Panel(child=layout2,title="History of terrorism attacks in the world")
-    tabs = Tabs(tabs=[tab1, tab2])
+tab1 = Panel(child=layout1, title='General')
+tab2 = Panel(child=layout2,title="History of terrorism attacks in the world")
+tabs = Tabs(tabs=[tab1, tab2])
 
-    #Making the document
-    doc.add_root(tabs)
-    doc.title = 'Terrorism'
-
-show(bkapp)
+#Making the document
+doc.add_root(tabs)
+doc.title = 'Terrorism'
