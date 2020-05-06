@@ -169,10 +169,10 @@ def animate():
     global callback_id
     if button.label == '► Play':
         button.label = '❚❚ Pause'
-        callback_id = doc.add_periodic_callback(animate_update, 1000)
+        callback_id = curdoc().add_periodic_callback(animate_update, 1000)
     else:
         button.label = '► Play'
-        doc.remove_periodic_callback(callback_id)
+        curdoc().remove_periodic_callback(callback_id)
 
 #Creating button for play and pause
 button = Button(label='► Play', width=450)
@@ -207,16 +207,16 @@ def update(step):
     ds1.trigger('data', ds1.data, ds1.data)
     ds2.trigger('data', ds2.data, ds2.data)
     if step == 2017:
-        doc.remove_periodic_callback(callback_id)
+        curdoc().remove_periodic_callback(callback_id)
 
 def animate():
     global callback_id
     if button.label == '► Play':
         button.label = '❚❚ Pause'
-        callback_id = doc.add_periodic_callback(update, 600)
+        callback_id = curdoc().add_periodic_callback(update, 600)
     else:
         button.label = '► Play'
-        doc.remove_periodic_callback(callback_id)
+        curdoc().remove_periodic_callback(callback_id)
 
 #Creating button for play and pause
 button = Button(label='► Play', width=800)
@@ -310,5 +310,5 @@ tab2 = Panel(child=layout2,title="History of terrorism attacks in the world")
 tabs = Tabs(tabs=[tab1, tab2])
 
 #Making the document
-doc.add_root(tabs)
-doc.title = 'Terrorism'
+curdoc().add_root(tabs)
+curdoc().title = 'Terrorism'
