@@ -31,19 +31,20 @@ import warnings
 warnings.filterwarnings('ignore')
 from bokeh.application import Application
 from bokeh.application.handlers.function import FunctionHandler
-import fiona
+#import fiona
+from os.path import dirname, join
 
 
 # ## Importeren files
 
 #File with the terrorist attacks
-Terrorist_attacks = pd.read_excel(join(dirname(__file__),'Data/Terrorist attacks.xlsx')
+Terrorist_attacks = pd.read_excel(join(dirname(__file__),'Terrorist attacks.xlsx')
 
 #File with the geometry values of the world
 world = gp.read_file(gp.datasets.get_path('naturalearth_lowres'))
 
 #File with human development index wordt geopend
-Human_Development_Index = pd.read_excel(join(dirname(__file__),'Data/HDI.xlsx')
+Human_Development_Index = pd.read_excel(join(dirname(__file__),'HDI.xlsx')
 
 
 # ## Cleanen data 
