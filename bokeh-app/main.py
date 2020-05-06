@@ -41,23 +41,17 @@ from sklearn.preprocessing import PolynomialFeatures
 
 # ## Importeren files
 
-# In[12]:
-
-
 #File with the terrorist attacks
-Terrorist_attacks = pd.read_excel('C:/Users/kyrajongman/Documents/Challenge/Terrorist attacks.xlsx')
+Terrorist_attacks = pd.read_excel(join(dirname(__file__),'Data/Terrorist attacks.xlsx')
 
 #File with the geometry values of the world
 world = gp.read_file(gp.datasets.get_path('naturalearth_lowres'))
 
 #File with human development index wordt geopend
-Human_Development_Index = pd.read_excel('C:/Users/kyrajongman/Documents/Challenge/HDI.xlsx')
+Human_Development_Index = pd.read_excel(join(dirname(__file__),'Data/HDI.xlsx')
 
 
 # ## Cleanen data 
-
-# In[13]:
-
 
 #Using dissolve to group by the dataframe with geometry values
 World = gp.GeoDataFrame(world.dissolve(by='name').reset_index())
@@ -65,9 +59,6 @@ World = gp.GeoDataFrame(world.dissolve(by='name').reset_index())
 #Using group by to group the dataframe on country and year
 #Using reset_index to rest the index columns to normal columns
 Terrorist_attacks_df = pd.DataFrame(Terrorist_attacks.groupby(['Country', 'Year']).sum().reset_index())
-
-
-# In[14]:
 
 
 #Making cumulative values
