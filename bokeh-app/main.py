@@ -3,9 +3,6 @@
 
 # ## Importeren packages 
 
-# In[11]:
-
-
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -64,17 +61,9 @@ Terrorist_attacks_df = pd.DataFrame(Terrorist_attacks.groupby(['Country', 'Year'
 #Making cumulative values
 Terrorist_attacks_df['no_cumulative'] = Terrorist_attacks_df.groupby(['Country'])['nkill'].apply(lambda x: x.cumsum())
 
-
-# In[15]:
-
-
 #Changing the value names so that the columns can be merged
 World.loc[World['name'] == 'United States of America', World.columns[0]] = 'United States'
 World.loc[World['name'] == 'Congo', World.columns[0]] = 'Republic of the Congo'
-
-
-# In[16]:
-
 
 #Convert the multipolygon values to polygon values
 indf = World
@@ -90,17 +79,9 @@ for idx, row in indf.iterrows():
             multdf.loc[geom,'geometry'] = row.geometry[geom]
             outdf = outdf.append(multdf,ignore_index=True)
 
-
-# In[17]:
-
-
 #Making a dataframe with the polygon values
 GeoDataframe_outdf = gp.GeoDataFrame(outdf)
 Countries_Polygon = gp.GeoDataFrame(GeoDataframe_outdf[GeoDataframe_outdf.geometry.type == 'Polygon'])
-
-
-# In[18]:
-
 
 #Combining the two dataframes on the country names
 Two_Dataframes = pd.merge(left=Terrorist_attacks_df, right=Countries_Polygon, left_on='Country', right_on='name')
@@ -110,9 +91,6 @@ Amount_of_Terrorist_Attacks = gp.GeoDataFrame(Two_Dataframes, columns = ['Year',
 
 
 # ## Making a map 
-
-# In[25]:
-
 
 def bkapp(doc):    
     #Creating x and y instead of geometry
@@ -337,15 +315,4 @@ def bkapp(doc):
     doc.add_root(tabs)
     doc.title = 'Terrorism'
 
-
-# In[27]:
-
-
 show(bkapp)
-
-
-# In[ ]:
-
-
-
-
