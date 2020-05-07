@@ -205,21 +205,35 @@ def update(step):
     ds2.data['y'].append(nkill[step-1970])  
     ds1.trigger('data', ds1.data, ds1.data)
     ds2.trigger('data', ds2.data, ds2.data)
-    if step == 2017:
-        curdoc().remove_periodic_callback(callback_id)
+    #if step == 2017:
+        #curdoc().remove_periodic_callback(callback_id)
 
+#Creating Slider for Year
+start_yr = min(p_df['Year'])
+end_yr = max(p_df['Year'])
+slider = Slider(start=start_yr, end=end_yr, step=1, value=start_yr, title='Year', width=450)
+slider.on_change('value',update)
+
+#Creating animate update function for slider
+def animate_update():
+    year = slider.value + 1
+    if year > end_yr:
+        year = start_yr
+    slider.value = year
+
+#Creating animate function for slider with button
 def animate():
     global callback_id
     if button.label == '► Play':
         button.label = '❚❚ Pause'
-        callback_id = curdoc().add_periodic_callback(update, 600)
+        callback_id = curdoc().add_periodic_callback(animate_update, 1000)
     else:
         button.label = '► Play'
         curdoc().remove_periodic_callback(callback_id)
 
 #Creating button for play and pause
 button = Button(label='► Play', width=800)
-button.on_click(animate) 
+button.on_click(animate)        
 
 Gefilterde_df_Afghanistan = Terrorist_attacks[Terrorist_attacks['Country']=='Afghanistan']
 success_Afghanistan = pd.DataFrame(Gefilterde_df_Afghanistan.groupby(['Year', 'Success', 'Country'])['City'].count().reset_index())
