@@ -301,7 +301,7 @@ slider_range = RangeSlider(title="Choose years", start=str_year, end=end_year, v
 slider_range.on_change('value', update_line)
 
 layout2 = layout([
-[slider, button],
+[button],
 [p],[select, slider_range],[k, t], 
 ], sizing_mode='scale_width')
 
