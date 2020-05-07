@@ -209,31 +209,31 @@ def update(step):
         #curdoc().remove_periodic_callback(callback_id)
 
 #Creating Slider for Year
-start_yr = min(p_df['Year'])
-end_yr = max(p_df['Year'])
+start_yr = min(df_Terrorist['Year'])
+end_yr = max(df_Terrorist['Year'])
 slider = Slider(start=start_yr, end=end_yr, step=1, value=start_yr, title='Year', width=450)
 slider.on_change('value',update)
 
 #Creating animate update function for slider
-def animate_update():
+def animate_update_plot():
     year = slider.value + 1
     if year > end_yr:
         year = start_yr
     slider.value = year
 
 #Creating animate function for slider with button
-def animate():
+def animate_plot():
     global callback_id
     if button.label == '► Play':
         button.label = '❚❚ Pause'
-        callback_id = curdoc().add_periodic_callback(animate_update, 1000)
+        callback_id = curdoc().add_periodic_callback(animate_update_plot, 1000)
     else:
         button.label = '► Play'
         curdoc().remove_periodic_callback(callback_id)
 
 #Creating button for play and pause
 button = Button(label='► Play', width=800)
-button.on_click(animate)        
+button.on_click(animate_plot)        
 
 Gefilterde_df_Afghanistan = Terrorist_attacks[Terrorist_attacks['Country']=='Afghanistan']
 success_Afghanistan = pd.DataFrame(Gefilterde_df_Afghanistan.groupby(['Year', 'Success', 'Country'])['City'].count().reset_index())
@@ -314,7 +314,7 @@ slider_range = RangeSlider(title="Choose years", start=str_year, end=end_year, v
 slider_range.on_change('value', update_line)
 
 layout2 = layout([
-[button],
+[slider, button],
 [p],[select, slider_range],[k, t], 
 ], sizing_mode='scale_width')
 
