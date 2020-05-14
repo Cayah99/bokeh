@@ -19,7 +19,7 @@ from bokeh.models import (Button, CategoricalColorMapper, ColumnDataSource, Sele
                           HoverTool, Label, SingleIntervalTicker, Slider,LinearColorMapper, MultiSelect, CheckboxButtonGroup, CheckboxGroup, RangeSlider)
 from bokeh.models import ColorBar
 from bokeh.palettes import Spectral6, Viridis256
-from bokeh.models.widgets import Panel, Tabs
+from bokeh.models.widgets import Panel, Tabs, Paragraph
 import yaml
 from bokeh.server.server import Server
 from bokeh.driving import linear
@@ -177,10 +177,13 @@ def animate():
 button = Button(label='► Play', width=450)
 button.on_click(animate)
 
+text1 = Paragraph(text="""In the figure above, we can see per year in which countries there was a terrorist attack. In a certain year, it may be that a country is not shown on the map because no terrorist attacks took place in that year. The color (shown in the color bar on the right) of the particular country depends on the amount of deaths in the attacks from 1970 until the selected year.""")
+    
 #Creating layout
 layout1 = layout([
 [p],
-[slider, button],
+[slider, button], 
+[text1],
 ], sizing_mode='scale_width')
 
 df_Terrorist = pd.DataFrame(Terrorist_attacks.groupby('Year').agg({'City':'size', 'nkill':'sum'}).reset_index())
@@ -300,9 +303,17 @@ end_year = max(success['Year'])
 slider_range = RangeSlider(title="Choose years", start=str_year, end=end_year, value=(str_year, end_year), step=5, width=400)
 slider_range.on_change('value', update_line)
 
+text2 = Paragraph(text="""In the figure above, we can see the amount of deaths and the amount of terrorist attacks in the world per year and how these two are related.""")
+text3 = Paragraph(text="""In the figure above, we can see the amount of terrorist attacks with success and no success. The years and the country of which the terrorist attacks with success and no success can be seen, depends on the choice you made in the above input fields.There is a chance a country doesn't have had terrorist attacks in the year range you chose, the plot will be blank""")
+text4 = Paragraph(text="""In the figure above, we can see the Human Development Index per year. The Human Development Index is a score between 0 and 1000 and measures the poverty, illiteracy, education and life expectancy in a particular country. The years and the country of which the Human Development Index can be seen, depends on the choice you made in the above input fields. There is a chance a country doesn't have had terrorist attacks in the year range you chose, the plot will be blank""")
+
 layout2 = layout([
 [button],
-[p],[select, slider_range],[k, t], 
+[p],
+[text2],
+[select, slider_range],
+[k, t], 
+[text3, text4],
 ], sizing_mode='scale_width')
 
 tab1 = Panel(child=layout1, title='General')
